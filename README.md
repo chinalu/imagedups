@@ -1,4 +1,4 @@
-# imagedups
+# imagedups （[中文](https://github.com/chinalu/imagedups/blob/main/README_CN.md)）
 Find/Delete duplicated images
 
 ## Install 
