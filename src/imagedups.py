@@ -73,7 +73,6 @@ def main(args=None):
   inspire by fdupes
     """, formatter_class=argparse.RawDescriptionHelpFormatter)
     
-    # submain = parser.add_argument_group('Usage: imagedups [options] DIRECTORY...')
     parser.add_argument('-d', '--delete', dest='delete', default=False, action='store_true', 
                             help='Delete duplicated files, keep one image only')
     parser.add_argument('-r', '--recurse', dest='recurse', default=False, action='store_true', 
@@ -91,16 +90,12 @@ prompting the user
                             help='Consider only files less than or equal to SIZE bytes')
     parser.add_argument('-p', '--path', dest='paths', nargs='+', type=str, required=True)
 
-    # submain.add_argument('--image_dim', dest='image_dim', type=int,
-                            # help="The square dimension of the model's input shape")
     if args is not None:
         config = vars(parser.parse_args(args))
     else:
         config = vars(parser.parse_args())
     
     dupes(config)
-    # if config['image_source'] is None or not exists(config['image_source']):
-    # 	raise ValueError("image_source must be a valid directory with images or a single image to classify.")
     
 
 
