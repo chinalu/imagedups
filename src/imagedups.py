@@ -10,13 +10,13 @@ import progressbar
 def dupes(config):
     hmap = {}
     paths = config['paths']
-    allpaths = []
+    subdirs = []
     if config['recurse']:
         for path in paths:
             for root, dirs, _ in os.walk(path):
                 for name in dirs:
-                    allpaths.append(os.path.join(root, name))
-    paths += allpaths
+                    subdirs.append(os.path.join(root, name))
+    paths += subdirs
     files = []
     for path in paths:
         fs = os.listdir(path)
@@ -36,7 +36,6 @@ def dupes(config):
             sims.append(fpath)
             hmap[h] = sims
         except Exception as e:
-            # print(e)
             pass
     pbar.finish()
     
@@ -59,8 +58,6 @@ def dupes(config):
                     os.unlink(fpath)
         if not config['quiet']:            
             print()
-
-    
 
 def main(args=None):
     parser = argparse.ArgumentParser(
@@ -97,8 +94,5 @@ prompting the user
     
     dupes(config)
     
-
-
 if __name__ == '__main__':
     main()
-
