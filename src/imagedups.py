@@ -5,7 +5,7 @@ import os
 import sys
 import imagehash
 import progressbar
-
+import multiprocessing as mp
 
 def dupes(config):
     hmap = {}
@@ -25,21 +25,20 @@ def dupes(config):
             if os.path.isdir(fpath):
                 continue
             files.append(fpath)
-    file_num = len(files)
-    pbar = progressbar.ProgressBar(max_value=file_num)
-    for i, fpath in enumerate(files):
-        try:
-            pbar.update(i)
-            h = imagehash.average_hash(Image.open(fpath))
-            h = "%s" % h
-            sims = hmap.get(h, [])
-            sims.append(fpath)
-            hmap[h] = sims
-        except Exception as e:
-            pass
-    pbar.finish()
     
-    for k, v in hmap.items():
+    num_cores = int(mp.cpu_count())
+    pool = mp.Pool(num_cores)
+    manager = mp.Manager()
+    managed_locker = manager.Lock()
+    managed_dict = manager.dict()
+    results = [pool.apply_async(async_hash, args=(fpath, managed_dict, managed_locker)) for fpath in files]
+    
+    pbar = progressbar.ProgressBar(max_value=len(files))
+    for i, p in enumerate(results):
+        p.get()
+        pbar.update(i)
+    pbar.finish()
+    for k, v in managed_dict.items():
         if len(v) == 1:
             continue
         for idx, fpath in enumerate(v):
@@ -58,6 +57,17 @@ def dupes(config):
                     os.unlink(fpath)
         if not config['quiet']:            
             print()
+
+def async_hash(fpath, result_dict, result_lock):
+    try:
+        h = imagehash.average_hash(Image.open(fpath))
+        h = "%s" % h
+        sims = result_dict.get(h, [])
+        sims.append(fpath)
+        with result_lock:
+            result_dict[h] = sims
+    except Exception as e:
+        pass
 
 def main(args=None):
     parser = argparse.ArgumentParser(
